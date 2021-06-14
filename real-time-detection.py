@@ -16,7 +16,8 @@ for img in os.listdir(path):
     image = cv2.imread(f'{path}/{img}')
     images.append(image)
     classNames.append(os.path.splitext(img)[0])
-    print(classNames)
+
+print(classNames)
 
 
 # Function for Find the encoded data of the imput image
@@ -47,14 +48,15 @@ while True:
     
     face_locations = face_recognition.face_locations(imgS)
     face_encodes = face_recognition.face_encodings(imgS,face_locations)
-
+    
     # Finding the matches for each detection
     
     for encodeFace,faceLoc in zip(face_encodes,face_locations):
         matches = face_recognition.compare_faces(encodeListKnown,encodeFace)
         faceDis = face_recognition.face_distance(encodeListKnown,encodeFace)
         matchIndex = np.argmin(faceDis)
-        
+
+ 
         # If match found then get the classname for corresponding match
 
         if matches[matchIndex]:
