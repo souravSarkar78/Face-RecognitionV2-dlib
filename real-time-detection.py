@@ -2,11 +2,15 @@ import cv2
 import numpy as np
 import face_recognition
 import os
-from datetime import datetime
 
 # Define the path for training images
 
 path = 'faces'
+
+# Image resize scale
+
+scale = 0.25
+box_multiplier = 1/scale
 
 images = []
 classNames = []
@@ -31,7 +35,7 @@ def findEncodings(images):
 
 # Find encodings of training images
 
-encodeListKnown = findEncodings(images)
+knownEncodes = findEncodings(images)
 print('Encoding Complete')
  
 # Define a videocapture object
@@ -41,7 +45,7 @@ while True:
     success, img = cap.read()  # Reaading Each frame
     
     # Resizing the frame
-    imgS = cv2.resize(img,(0,0),None,0.25,0.25)
+    imgS = cv2.resize(img,(0,0),None,scale,scale)
     imgS = cv2.cvtColor(imgS, cv2.COLOR_BGR2RGB)
 
     # Finding the face location and endoings for the current frame
@@ -52,8 +56,8 @@ while True:
     # Finding the matches for each detection
     
     for encodeFace,faceLoc in zip(face_encodes,face_locations):
-        matches = face_recognition.compare_faces(encodeListKnown,encodeFace)
-        faceDis = face_recognition.face_distance(encodeListKnown,encodeFace)
+        matches = face_recognition.compare_faces(knownEncodes,encodeFace)
+        faceDis = face_recognition.face_distance(knownEncodes,encodeFace)
         matchIndex = np.argmin(faceDis)
 
  
@@ -68,7 +72,7 @@ while True:
         # Draw the detection and names on the frame
 
         y1,x2,y2,x1 = faceLoc
-        y1, x2, y2, x1 = y1*4,x2*4,y2*4,x1*4
+        y1, x2, y2, x1 = int(y1*box_multiplier),int(x2*box_multiplier),int(y2*box_multiplier),int(x1*box_multiplier)
         cv2.rectangle(img,(x1,y1),(x2,y2),(0,255,0),2)
         cv2.rectangle(img,(x1,y2-35),(x2,y2),(0,255,0),cv2.FILLED)
         cv2.putText(img,name,(x1+6,y2-6),cv2.FONT_HERSHEY_COMPLEX,0.5,(255,255,255),2)
